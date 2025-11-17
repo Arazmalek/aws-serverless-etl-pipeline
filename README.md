@@ -1,44 +1,41 @@
-# aws-serverless-etl-pipeline
-Production-ready, Serverless ETL pipeline for complex financial data validation,built on AWS Glue and Spark.
-
-# 🚀 Serverless Data Lake Architecture for Financial Data Validation (AWS)
+# 🌟 Enterprise-Grade Serverless Data Lake Platform (AWS ETL/MLOps Foundation)
 
 ## EXECUTIVE SUMMARY
-This repository showcases a production-ready, highly scalable, and cost-effective **Serverless ETL Pipeline** designed for automated data ingestion and validation within a modern **AWS Data Lake** environment. The architecture ensures secure data ingress and transforms raw data into a clean, cataloged format for Business Intelligence (BI) consumption.
+This repository showcases a highly resilient, cost-optimized **Serverless Data Lake Architecture** designed for high-throughput ETL processing and mission-critical financial data validation. The system automates the ingestion, transformation (using AWS Glue/Spark), and cataloging of proprietary client data, setting a robust, governance-focused foundation for advanced analytics and MLOps initiatives.
 
-**🎯 Core Business Achievement:**
-The core processing logic was engineered to automate financial data extraction and validation from multi-hundred-page reports. This system **reduced manual data processing time from weeks to under 5 minutes**, completely eliminating human error.
+**🎯 Core Business Achievement: Zero-Touch Automation**
+The bespoke transformation logic successfully automated the complex extraction and validation of sensitive, multi-source financial reports. This solution resulted in a **99% reduction in manual data processing time** and enabled real-time reporting accuracy for the BI team.
 
 ---
 
 ## 🏗️ SYSTEM ARCHITECTURE & DATA FLOW
-The diagram demonstrates the full data flow from the Client Source to the Final Consumption Layer.
+The diagram illustrates the decoupled, event-driven architecture, highlighting the flow from secure client upload to BI consumption.
 
-**(Insert the final architecture diagram image here)**
-![Architecture Diagram](Link-to-your-Diagram.png)
-
----
-
-## ⚙️ TECHNICAL BREAKDOWN & KEY COMPONENTS
-
-### 1. SECURE INGESTION LAYER
-* **AWS API Gateway & Lambda:** Implemented a secure API layer using Lambda to receive data via **Presigned URLs** and trigger the ETL process in an event-driven, **Serverless** manner.
-* **Python Client Utility:** Contains the client-side code for secure file transmission, demonstrating tokenization and best security practices.
-
-### 2. STORAGE & CATALOGING LAYER
-* **AWS S3 (Multi-Tiered Storage):** Utilized S3 for both **Raw** and **Clean/Processed** storage tiers, adhering to Data Lake standards.
-* **AWS Glue Data Catalog & Crawler:** Employed the Crawler to index data in S3 and create the **Glue Data Catalog** for metadata management and accessibility by analytical tools.
-
-### 3. TRANSFORMATION & VALIDATION LAYER
-* **AWS Glue Spark:** Engineered sophisticated **PySpark** scripts to perform complex ETL operations, including data cleaning, schema enforcement, and high-scale **Financial Data Validation** logic.
-
-### 4. DEPLOYMENT & MLOPS FOUNDATION
-* The architecture readily supports **MLOps** principles. This structure was later leveraged for the production deployment of specialized models, including **LLM models**, via internal APIs.
-
-## 🚀 SETUP AND DEPLOYMENT
-1.  **Code Base:** Python 3.9+ (PySpark).
-2.  **Containerization:** Code is containerized using **Docker**.
-3.  **Infrastructure as Code (IaC):** Configuration files (e.g., CloudFormation templates) are located in the `/infra` folder to demonstrate infrastructure deployment capability.
+<img width="1034" height="451" alt="Untitled Diagram drawio" src="https://github.com/user-attachments/assets/9f6d01a7-40c8-47d6-9f64-d81bc04dcfcd" />
 
 ---
-**[Your Name]** | *Senior Data Engineer & System Architect*
+
+## ⚙️ TECHNICAL SPECIFICATIONS & ARCHITECTURAL CHOICES
+
+### 1. SECURE & DECOUPLED INGESTION
+* **AWS API Gateway & Lambda:** Utilized for a high-throughput, event-driven entry point. The use of **Presigned URLs** enforces strict security protocols, limiting direct bucket access and ensuring data integrity upon arrival (Ingress Control).
+* **Ingestion Logic (Python):** Lambda functions are responsible for initial validation and writing raw files to the **S3 Raw Layer**, establishing the Single Source of Truth (SSOT).
+
+### 2. DATA LAKE CORE & GOVERNANCE
+* **AWS S3 (Multi-Tiered):** Data is organized into segregated Raw and Processed (Clean) S3 buckets, optimizing cost and governance.
+* **AWS Glue Data Catalog & Crawler:** Implemented for **Schema-on-Read** capability. The Catalog acts as the central Metadata Repository, providing structured access to data for all consumption tools.
+
+### 3. ADVANCED TRANSFORMATION (ETL)
+* **AWS Glue Spark (PySpark):** PySpark scripts are executed in a managed Glue environment for parallel and distributed processing. This ensures **linear scalability** for large datasets and maximizes cost-efficiency by paying only for compute time.
+* **Validation Engine:** The core transformation logic includes advanced data quality checks and specialized validation rules for complex financial datasets.
+
+## 🚀 DEPLOYMENT & MLOPS FOUNDATION
+
+| Feature | Tool / Service | Senior Justification |
+| :--- | :--- | :--- |
+| **Containerization** | **Docker** | Used for local development, dependency management, and ensuring environment parity between local development and the **AWS deployment environment**. |
+| **Infrastructure as Code (IaC)** | **CloudFormation / SAM** | The entire AWS infrastructure (Lambda, API Gateway, Glue Jobs) is defined and deployed using IaC templates (located in the `/infra` folder), ensuring automated, repeatable, and version-controlled deployment. |
+| **Monitoring & Logging** | **AWS CloudWatch & Grafana** | Integrated metrics and detailed logging via CloudWatch for proactive pipeline health checks, performance alerting, and historical data analysis, visualized via Grafana dashboards. |
+
+---
+**Araz Malekazari** | *Senior Data Engineer & System Architect*
