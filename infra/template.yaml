@@ -1,0 +1,92 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Enterprise Serverless ETL Pipeline Infrastructure
+  Architecture: API Gateway -> Lambda -> S3 -> AWS Glue -> Data Catalog
+
+# Global settings
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    Runtime: python3.9
+    Architectures:
+      - x86_64
+
+Resources:
+  # --- 1. STORAGE LAYER (Data Lake) ---
+  DataLakeRawBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-raw-zone'
+      VersioningConfiguration:
+        Status: Enabled
+
+  DataLakeCleanBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-clean-zone'
+
+  # --- 2. INGESTION LAYER (Serverless) ---
+  IngestionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../src/aws_server_side/ingestion/
+      Handler: ingestion_handler.lambda_handler
+      Description: Generates presigned URLs and triggers ETL workflow
+      Environment:
+        Variables:
+          S3_TARGET_BUCKET: !Ref DataLakeRawBucket
+          GLUE_WORKFLOW_NAME: !Ref MainEtlWorkflow
+          AWS_REGION: !Ref "AWS::Region"
+      Policies:
+        - S3WritePolicy:
+            BucketName: !Ref DataLakeRawBucket
+        - GlueJobControlPolicy: {}
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /upload
+            Method: get
+
+  # --- 3. ORCHESTRATION LAYER (Glue Workflow) ---
+  MainEtlWorkflow:
+    Type: AWS::Glue::Workflow
+    Properties:
+      Name: FinancialDataValidationWorkflow
+      Description: Orchestrates the crawling, transformation, and export jobs
+
+  # --- 4. JOB DEFINITIONS (Code Blocks) ---
+  FinancialTransformationJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub "${AWS::StackName}-transformation-job"
+      Role: !GetAtt GlueServiceRole.Arn
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub "s3://${DataLakeRawBucket}/scripts/transformation_job.py"
+      GlueVersion: "4.0"
+      WorkerType: G.1X
+      NumberOfWorkers: 2
+      DefaultArguments:
+        "--S3_TARGET_PATH": !Sub "s3://${DataLakeCleanBucket}/"
+
+  # --- 5. SECURITY ---
+  GlueServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+
+Outputs:
+  IngestionApiEndpoint:
+    Description: "API Gateway endpoint URL for client upload"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/upload/"
